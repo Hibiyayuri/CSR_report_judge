@@ -1,0 +1,53 @@
+import requests
+from selenium import webdriver
+import time
+import random
+from bs4 import BeautifulSoup
+import csv
+
+#---------------------------------------------------開啟 CromeDriver------------------------------------------------------------------------
+
+options = webdriver.ChromeOptions()
+options.add_argument('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Mobile Safari/537.36')
+#禁止使用圖片
+prefs = {
+              'profile.default_content_setting_values': {
+                'images': 2,
+                'javascript': 2        #2即表示禁用
+                }
+ }
+options.add_experimental_option('prefs', prefs)
+driver = webdriver.Chrome('./chromedriver.exe')
+
+
+#------------------------------------爬搜尋頁並將連結存在 csv 檔裡 -----------------------------------------------------------------------------
+Skylinelinks=r'C:\Users\chjhs\OneDrive - 國立成功大學\成大\通識\生成式人工智慧輔助之 Python 程式設計\專題報告\CSR_report_judge\TWSElinks.csv' #csv 儲存路徑
+link_list=[]
+for page in range(1,15,1):
+    driver.get('https://cgc.twse.com.tw/corpSocialResponsibility/chPage'+str(page))
+    headers={
+        'Referer':'https://mops.twse.com.tw', #設定參照位址，告訴網站這個Request是來自於哪一個網站，防止被偵測封鎖
+        'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Mobile Safari/537.36',
+    }
+    
+    time.sleep(random.uniform(5,10))
+    soup = BeautifulSoup(driver.page_source, "html.parser")
+    
+    a_tag=soup.select('div.post-title a') #寫道這~20230801~
+    for link in a_tag:
+        data = link.get('href')
+        link_list.append(data)
+        print(data)
+    time.sleep(random.uniform(5,10))
+    
+data_length=len(data)
+print(data_length)
+    
+
+    
+#把爬到的連結存入csv檔    
+with open('Skylinelinks.csv','w',newline='',encoding='utf-8-sig' )as csvfile:
+        writer=csv.writer(csvfile)
+        writer.writerow(link_list)
+        csvfile.close()
+        time.sleep(random.uniform(5,10))
